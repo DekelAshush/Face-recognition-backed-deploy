@@ -58,10 +58,8 @@ const corsOptions = {
 
 // ✅ Must come BEFORE express.json() and routes
 app.use(cors(corsOptions));
-app.options('/*', cors(corsOptions));
-app.use(express.json());
+app.options(/.*/, cors(corsOptions));app.use(express.json());
 
-// Optional: helpful debug middleware
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
