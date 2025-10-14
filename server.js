@@ -58,7 +58,7 @@ const corsOptions = {
 
 // ✅ Must come BEFORE express.json() and routes
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.options('/*', cors(corsOptions));
 app.use(express.json());
 
 // Optional: helpful debug middleware
