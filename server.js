@@ -34,6 +34,7 @@ const app = express();
 
 //  Logging, JSON parsing, and CORS setup
 app.use(morgan('combined'));
+app.options('*', cors()); // Handles preflight requests (OPTIONS)
 app.use(express.json());
 
 //  Allow localhost + deployed frontend
@@ -54,7 +55,6 @@ app.use(
         },
     })
 );
-app.options('*', cors()); // Handles preflight requests (OPTIONS)
 
 //  Health check endpoint (useful for Render)
 app.get('/', (req, res) => res.json({ status: 'ok', message: 'Backend is running 🚀' }));
@@ -68,6 +68,12 @@ app.post('/profile/:id', requireAuth, (req, res) => handleProfileUpdate(req, res
 
 app.put('/image', requireAuth, (req, res) => handleImage(req, res, db));
 app.post('/imageurl', requireAuth, (req, res) => handleApiCall(req, res));
+
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    next();
+});
 
 // Start server (Render provides PORT automatically)
 const PORT = process.env.PORT || 3000;
