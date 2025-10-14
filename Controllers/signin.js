@@ -1,9 +1,15 @@
 import jwt from 'jsonwebtoken';
-import redis from 'redis';
+import { createClient } from 'redis';
 
-const redisClient = redis.createClient({ url: process.env.REDIS_URL });
-redisClient.on('error', err => console.error('Redis Error:', err));
-redisClient.connect();
+const redisClient = createClient({
+    url: process.env.REDIS_URL,
+    socket: {
+        connectTimeout: 5000,
+        tls: process.env.REDIS_URL?.startsWith('rediss://'),
+    },
+});
+redisClient.on('error', (err) => console.error('Redis Error:', err));
+redisClient.connect().then(() => console.log('✅ Redis connected'));
 
 const signToken = (username) =>
     jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '2d' });
@@ -25,21 +31,24 @@ const handleSignin = (db, bcrypt, req, res) => {
         return Promise.reject('incorrect form submission');
     }
     const normalizedEmail = email.toLowerCase();
-    return db.select('email', 'hash')
+    return db
+        .select('email', 'hash')
         .from('login')
         .whereRaw('LOWER(email) = ?', [normalizedEmail])
-        .then(data => {
+        .then((data) => {
             const isValid = bcrypt.compareSync(password, data[0].hash);
             if (isValid) {
-                return db.select('*').from('users')
+                return db
+                    .select('*')
+                    .from('users')
                     .whereRaw('LOWER(email) = ?', [normalizedEmail])
-                    .then(user => user[0])
-                    .catch(err => res.status(400).json('unable to get user'));
+                    .then((user) => user[0])
+                    .catch(() => res.status(400).json('unable to get user'));
             } else {
                 return Promise.reject('wrong credentials');
             }
         })
-        .catch(err => err);
+        .catch((err) => err);
 };
 
 const getAuthTokenId = async (req, res) => {
@@ -55,10 +64,7 @@ const getAuthTokenId = async (req, res) => {
 
 const signinAuthentication = (db, bcrypt) => async (req, res) => {
     const { authorization } = req.headers;
-
-    if (authorization) {
-        return getAuthTokenId(req, res);
-    }
+    if (authorization) return getAuthTokenId(req, res);
 
     try {
         const data = await handleSignin(db, bcrypt, req, res);
