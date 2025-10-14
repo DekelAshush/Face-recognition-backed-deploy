@@ -40,7 +40,7 @@ app.use(express.json());
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://face-recognition-frontend-deploy.onrender.com', // ← your deployed frontend
+    'https://face-recognition-frontend-deploy-adbs.onrender.com', // ← your deployed frontend
 ];
 
 app.use(
@@ -54,6 +54,7 @@ app.use(
         },
     })
 );
+app.options('*', cors()); // Handles preflight requests (OPTIONS)
 
 //  Health check endpoint (useful for Render)
 app.get('/', (req, res) => res.json({ status: 'ok', message: 'Backend is running 🚀' }));
