@@ -11,7 +11,7 @@ const handleProfileUpdate = (req, res, db) => {
 
     db('users')
         .where({ id })
-        .update({ name, age, favourite_pet: pet }) // ✅ match DB column name
+        .update({ name, age, favorite_pet: pet }) // ✅ match DB column name
         .then(resp => {
             if (resp) res.json('success');
             else res.status(400).json('Unable to update');
