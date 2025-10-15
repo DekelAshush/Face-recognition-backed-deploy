@@ -4,6 +4,12 @@ const handleRegister = (req, res, db, bcrypt) => {
         return res.status(400).json('incorrect form submission');
     }
 
+    //  email format check (regex)
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.com$/.test(email);
+    if (!isValidEmail) {
+        return res.status(400).json('invalid email format');
+    }
+
     const hash = bcrypt.hashSync(password, 10);
 
     db.transaction(trx => {
