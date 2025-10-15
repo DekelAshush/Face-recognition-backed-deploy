@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import cors from 'cors';
 import knex from 'knex';
 import morgan from 'morgan';
-import { redisClient } from './controllers/signin.js';
+import { redisClient } from './Controllers/signin.js';
 
 import { handleRegister } from './Controllers/register.js';
 import { signinAuthentication } from './Controllers/signin.js';
