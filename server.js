@@ -26,11 +26,6 @@ const connectionConfig = process.env.DATABASE_URL
         database: process.env.DB_NAME || 'smartbrain',
     };
 
-// ✅ Must come BEFORE express.json() and routes
-app.use(cors(corsOptions));
-app.options(/.*/, cors(corsOptions));
-app.use(express.json());
-
 const db = knex({
     client: 'pg',
     connection: connectionConfig,
@@ -44,7 +39,7 @@ app.use(morgan('combined'));
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://face-recognition-frontend-deploy-adbs.onrender.com', // ✅ your deployed frontend
+    'https://face-recognition-frontend-deploy-adbs.onrender.com', // ✅ deployed frontend
 ];
 
 const corsOptions = {
@@ -62,7 +57,10 @@ const corsOptions = {
     optionsSuccessStatus: 204,
 };
 
-
+// ---------- MIDDLEWARE ----------
+app.use(cors(corsOptions));            // ✅ CORS first
+app.options(/.*/, cors(corsOptions));  // ✅ Preflight
+app.use(express.json());               // ✅ Parse JSON next
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
@@ -76,26 +74,32 @@ app.use((req, res, next) => {
 });
 
 // ---------- ROUTES ----------
-app.get('/', (req, res) => res.json({ status: 'ok', message: 'Backend is running 🚀' }));
+app.get('/', (req, res) =>
+    res.json({ status: 'ok', message: 'Backend is running 🚀' })
+);
 
 app.post('/signin', signinAuthentication(db, bcrypt));
 app.post('/register', (req, res) => handleRegister(req, res, db, bcrypt));
-app.get('/profile/:id', requireAuth, (req, res) => handleProfileGet(req, res, db));
-app.post('/profile/:id', requireAuth, (req, res) => handleProfileUpdate(req, res, db));
+app.get('/profile/:id', requireAuth, (req, res) =>
+    handleProfileGet(req, res, db)
+);
+app.post('/profile/:id', requireAuth, (req, res) =>
+    handleProfileUpdate(req, res, db)
+);
 app.put('/image', requireAuth, (req, res) => handleImage(req, res, db));
 app.post('/imageurl', requireAuth, (req, res) => handleApiCall(req, res));
 
 // ---------- SERVER ----------
 const PORT = process.env.PORT || 3000;
 
-redisClient.connect()
+redisClient
+    .connect()
     .then(() => {
         console.log('✅ Redis connected');
         app.listen(PORT, () => {
             console.log(`✅ App running on port ${PORT}`);
         });
     })
-    .catch(err => {
+    .catch((err) => {
         console.error('❌ Failed to connect to Redis:', err);
     });
-
