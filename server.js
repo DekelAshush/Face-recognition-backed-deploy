@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import cors from 'cors';
 import knex from 'knex';
 import morgan from 'morgan';
+import { redisClient } from './controllers/signin.js';
 
 import { handleRegister } from './Controllers/register.js';
 import { signinAuthentication } from './Controllers/signin.js';
@@ -83,6 +84,15 @@ app.post('/imageurl', requireAuth, (req, res) => handleApiCall(req, res));
 
 // ---------- SERVER ----------
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`✅ App running on port ${PORT}`);
-});
+
+redisClient.connect()
+    .then(() => {
+        console.log('✅ Redis connected');
+        app.listen(PORT, () => {
+            console.log(`✅ App running on port ${PORT}`);
+        });
+    })
+    .catch(err => {
+        console.error('❌ Failed to connect to Redis:', err);
+    });
+
