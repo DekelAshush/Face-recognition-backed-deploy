@@ -66,6 +66,11 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use((req, res, next) => {
+    console.log(`➡️  ${req.method} ${req.url}`, req.body);
+    next();
+});
+
 // ---------- ROUTES ----------
 app.get('/', (req, res) => res.json({ status: 'ok', message: 'Backend is running 🚀' }));
 
