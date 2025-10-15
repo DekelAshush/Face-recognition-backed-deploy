@@ -26,6 +26,11 @@ const connectionConfig = process.env.DATABASE_URL
         database: process.env.DB_NAME || 'smartbrain',
     };
 
+// ✅ Must come BEFORE express.json() and routes
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
+app.use(express.json());
+
 const db = knex({
     client: 'pg',
     connection: connectionConfig,
@@ -57,9 +62,7 @@ const corsOptions = {
     optionsSuccessStatus: 204,
 };
 
-// ✅ Must come BEFORE express.json() and routes
-app.use(cors(corsOptions));
-app.options(/.*/, cors(corsOptions));app.use(express.json());
+
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
